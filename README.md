@@ -49,6 +49,7 @@ cat readme
 ```bash
 cat ./-
 ```
+
 **Why `./`:** A bare `-` is treated by many commands as "standard input", not a filename. Prefixing `./` makes it an explicit path.
 
 **Learned:** Dashed filenames and relative paths.
@@ -68,6 +69,7 @@ cat "./--spaces in this filename--"
 **Learned:** Quoting and escaping special filenames.
 
 ---
+
 ## Level 3 > Level 4
 
 **Goal:** The password is in a hidden file inside the `inhere` directory.
@@ -78,9 +80,11 @@ cd inhere
 ls -a
 cat .<hidden-file-name>
 ```
+
 **Learned:** Files starting with `.` are hidden. `ls -a` shows them.
 
 ---
+
 ## Level 4 > Level 5
 
 **Goal:** The password is in the only human-readable file in `inhere`.
@@ -118,20 +122,13 @@ find / -user bandit7 -group bandit6 -size 33c 2>/dev/null
 cat <path-from-find>
 ```
 
-### Problem I hit and how I solved it
+**Explanation:**
 
-My first attempt used `2>dev/null`, and it did not hide the errors. Without redirecting errors, `find` printed a huge number of "Permission denied" lines with only one real result, and I picked out the password file by hand.
+- `find /` searches the whole filesystem.
+- `-user bandit7 -group bandit6 -size 33c` filters by owner, group, and size (33 bytes).
+- `2>/dev/null` redirects error messages (stderr) to `/dev/null`, which discards them. This hides the many "Permission denied" lines so only the real match is shown.
 
-**The bug:** I typed `2>dev/null` instead of `2>/dev/null`. The missing leading `/` makes it a relative path, so the shell looks for a `dev` folder in the current directory and fails.
-
-**The fix:** Use the full path `/dev/null`.
-
-- `2>` redirects **stderr** (error messages, file descriptor 2).
-- `/dev/null` is a special file that discards everything written to it.
-
-So `2>/dev/null` hides the "Permission denied" noise and leaves only the real match.
-
-**Learned:** Searching the whole filesystem, stderr redirection, and why exact paths matter.
+**Learned:** Searching the whole filesystem and redirecting stderr.
 
 ---
 
@@ -180,5 +177,5 @@ strings data.txt | grep "=="
 ## Takeaways
 
 - Special filenames need `./` and quotes.
-- `find` plus `2>/dev/null` makes system-wide searches usable.
+- `find` plus `2>/dev/null` makes system-wide searches clean and readable.
 - Pipes let you chain small tools into powerful one-liners.
